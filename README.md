@@ -4,7 +4,7 @@ A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally develope
 
 ## Features
 
-- **Modern Web Interface**: Beautiful, interactive Streamlit-based UI
+- **Modern Web Interface**: Clean, interactive web UI
   - Click-to-edit cells
   - Real-time validation
   - Visual distinction between clues and solutions
@@ -17,7 +17,7 @@ A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally develope
 
 - **Docker-Ready**: Containerized deployment with all dependencies included
 
-- **Direct Prolog Integration**: No Python fallback - pure Prolog solving power
+- **Direct Prolog Integration**: FastAPI calls into SWI-Prolog in-process via PySwip — no subprocess, no Python fallback
 
 ## Requirements
 
@@ -159,6 +159,7 @@ Key predicates:
 - `sudoku/1`: Main solver predicate
 - `valid_rows/1`, `valid_columns/1`, `valid_regions/1`: Constraint validators
 - `display_board/1`: Pretty-prints the board
+- `solve_api/2`: Entry point the web API calls via PySwip (0 = empty cell in, solved board out)
 
 ### Web Interface (src/main.py + src/static/)
 
@@ -216,7 +217,7 @@ sudoku-solver/
 
 ┌─────────────────┐
 │   Dockerfile    │  Containerization
-│                 │  - SWI-Prolog + Streamlit
+│                 │  - SWI-Prolog + FastAPI
 └─────────────────┘  - Production ready
 ```
 
