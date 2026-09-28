@@ -1,18 +1,13 @@
-"""Plain-assert smoke tests for solver.pl's solve_api/2, run via PySwip.
+"""Plain-assert smoke tests for solver.pl's solve_api/2, run via Janus.
 
 Run from anywhere: python tests/test_solver.py  (or: pytest tests/test_solver.py)
 """
 from pathlib import Path
 
-from pyswip import Prolog
+import janus_swi as janus
 
 SOLVER_PATH = str(Path(__file__).resolve().parent.parent / "src" / "solver.pl")
-
-
-def _prolog():
-    prolog = Prolog()
-    prolog.consult(SOLVER_PATH)
-    return prolog
+janus.consult(SOLVER_PATH)
 
 
 def _all_1_to_9(cells):
@@ -38,28 +33,24 @@ def _is_valid_solution(board):
 
 
 def test_solves_example_puzzles():
-    prolog = _prolog()
     for difficulty in ("easy", "medium", "hard"):
-        puzzle_results = list(
-            prolog.query(f"puzzle({difficulty}, B), puzzle_to_list(B, L)")
-        )
-        assert len(puzzle_results) == 1, f"expected puzzle({difficulty}, _) to exist"
-        board = [list(row) for row in puzzle_results[0]["L"]]
+        puzzle_result = janus.query_once("puzzle(D, L)", {"D": difficulty})
+        assert puzzle_result["truth"], f"expected puzzle({difficulty}, _) to exist"
+        board = puzzle_result["L"]
 
-        solve_results = list(prolog.query(f"solve_api({board}, Solution)"))
-        assert len(solve_results) == 1, f"expected {difficulty} puzzle to be solvable"
+        solve_result = janus.query_once("solve_api(Board, Solution)", {"Board": board})
+        assert solve_result["truth"], f"expected {difficulty} puzzle to be solvable"
 
-        solution = [list(row) for row in solve_results[0]["Solution"]]
+        solution = solve_result["Solution"]
         assert _is_valid_solution(solution), f"{difficulty} solution violates Sudoku rules"
 
 
 def test_unsatisfiable_board_yields_no_solution():
-    prolog = _prolog()
     board = [[0] * 9 for _ in range(9)]
     board[0][0] = 5
     board[0][1] = 5  # two 5s in row 0 makes this unsatisfiable
-    result = list(prolog.query(f"solve_api({board}, Solution)"))
-    assert result == []
+    result = janus.query_once("solve_api(Board, Solution)", {"Board": board})
+    assert result["truth"] is False
 
 
 if __name__ == "__main__":

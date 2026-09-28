@@ -113,53 +113,47 @@ display_board(Board) :-
 % EXAMPLE PUZZLES
 % =============================================================================
 
-% Helper to convert variables to 0 for external consumption
-puzzle_to_list([], []).
-puzzle_to_list([Row|Rows], [ConvertedRow|ConvertedRows]) :-
-    maplist(var_to_zero, Row, ConvertedRow),
-    puzzle_to_list(Rows, ConvertedRows).
-
-var_to_zero(X, 0) :- var(X), !.
-var_to_zero(X, X).
-
+% Empty cells are stored as 0 (not an unbound variable) so a puzzle fact
+% can be handed straight to Janus/Python as fully ground data. Use
+% replace_zeros/2 to convert to the unbound-variable form sudoku/1 needs.
 puzzle(easy,
-    [[_,_,3, _,2,_, 6,_,_],
-     [9,_,_, 3,_,5, _,_,1],
-     [_,_,1, 8,_,6, 4,_,_],
+    [[0,0,3, 0,2,0, 6,0,0],
+     [9,0,0, 3,0,5, 0,0,1],
+     [0,0,1, 8,0,6, 4,0,0],
 
-     [_,_,8, 1,_,2, 9,_,_],
-     [7,_,_, _,_,_, _,_,8],
-     [_,_,6, 7,_,8, 2,_,_],
+     [0,0,8, 1,0,2, 9,0,0],
+     [7,0,0, 0,0,0, 0,0,8],
+     [0,0,6, 7,0,8, 2,0,0],
 
-     [_,_,2, 6,_,9, 5,_,_],
-     [8,_,_, 2,_,3, _,_,9],
-     [_,_,5, _,1,_, 3,_,_]]).
+     [0,0,2, 6,0,9, 5,0,0],
+     [8,0,0, 2,0,3, 0,0,9],
+     [0,0,5, 0,1,0, 3,0,0]]).
 
 puzzle(medium,
-    [[_,_,_, 2,6,_, 7,_,1],
-     [6,8,_, _,7,_, _,9,_],
-     [1,9,_, _,_,4, 5,_,_],
+    [[0,0,0, 2,6,0, 7,0,1],
+     [6,8,0, 0,7,0, 0,9,0],
+     [1,9,0, 0,0,4, 5,0,0],
 
-     [8,2,_, 1,_,_, _,4,_],
-     [_,_,4, 6,_,2, 9,_,_],
-     [_,5,_, _,_,3, _,2,8],
+     [8,2,0, 1,0,0, 0,4,0],
+     [0,0,4, 6,0,2, 9,0,0],
+     [0,5,0, 0,0,3, 0,2,8],
 
-     [_,_,9, 3,_,_, _,7,4],
-     [_,4,_, _,5,_, _,3,6],
-     [7,_,3, _,1,8, _,_,_]]).
+     [0,0,9, 3,0,0, 0,7,4],
+     [0,4,0, 0,5,0, 0,3,6],
+     [7,0,3, 0,1,8, 0,0,0]]).
 
 puzzle(hard,
-    [[_,_,_, _,_,_, _,_,_],
-     [_,_,_, _,_,3, _,8,5],
-     [_,_,1, _,2,_, _,_,_],
+    [[0,0,0, 0,0,0, 0,0,0],
+     [0,0,0, 0,0,3, 0,8,5],
+     [0,0,1, 0,2,0, 0,0,0],
 
-     [_,_,_, 5,_,7, _,_,_],
-     [_,_,4, _,_,_, 1,_,_],
-     [_,9,_, _,_,_, _,_,_],
+     [0,0,0, 5,0,7, 0,0,0],
+     [0,0,4, 0,0,0, 1,0,0],
+     [0,9,0, 0,0,0, 0,0,0],
 
-     [5,_,_, _,_,_, _,7,3],
-     [_,_,2, _,1,_, _,_,_],
-     [_,_,_, _,4,_, _,_,9]]).
+     [5,0,0, 0,0,0, 0,7,3],
+     [0,0,2, 0,1,0, 0,0,0],
+     [0,0,0, 0,4,0, 0,0,9]]).
 
 list_puzzles :-
     write('  1. easy'), nl,
@@ -249,7 +243,8 @@ select_puzzle :-
     (   Choice =:= 4
     ->  solve_manual
     ;   puzzle_name(Choice, Name)
-    ->  puzzle(Name, Board),
+    ->  puzzle(Name, RawBoard),
+        maplist(replace_zeros, RawBoard, Board),
         solve_and_display(Name, Board)
     ;   write('Invalid option.'), nl
     ).
@@ -300,7 +295,7 @@ solve_and_print(Board) :-
     ).
 
 % =============================================================================
-% API INTERFACE (for PySwip)
+% API INTERFACE (for Janus)
 % =============================================================================
 
 % solve_api(+BoardIn, -Solution)
@@ -319,6 +314,6 @@ solve_api(BoardIn, Solution) :-
 %   swipl -q -g main -t halt solver.pl
 %
 % The automatic initialization is commented out to allow programmatic usage
-% from external programs (like app.py) without interference.
+% from external programs (like main.py, via Janus) without interference.
 %
 % :- initialization(main, main).

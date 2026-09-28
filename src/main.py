@@ -1,20 +1,20 @@
 """FastAPI backend for the Sudoku solver.
 
 Serves the static frontend and a small JSON API that calls into
-solver.pl in-process via PySwip (no subprocess). All Prolog queries go
-through a single shared engine guarded by a lock, since PySwip wraps
-one SWI-Prolog engine per process.
+solver.pl in-process via Janus (SWI-Prolog's own Python binding,
+ships with SWI-Prolog itself). Janus attaches a Prolog engine to
+whichever Python thread calls it, so it is safe to call concurrently
+from FastAPI's worker threads without an app-level lock.
 """
 
 import logging
-import threading
 from pathlib import Path
 from typing import Literal
 
+import janus_swi as janus
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
-from pyswip import Prolog
 
 logger = logging.getLogger(__name__)
 
@@ -22,9 +22,12 @@ _BASE_DIR = Path(__file__).resolve().parent
 
 app = FastAPI()
 
-_prolog = Prolog()
-_prolog.consult(str(_BASE_DIR / "solver.pl"))
-_lock = threading.Lock()
+janus.consult(str(_BASE_DIR / "solver.pl"))
+
+# Prolog is embedded with --no-signals when run under Janus, so
+# call_with_time_limit's alarm-based interrupt is otherwise inert.
+# heartbeat() makes Prolog check for it every N inferences.
+janus.heartbeat(10000)
 
 # ponytail: fixed 10s ceiling (matches the old subprocess timeout); lower/raise
 # if real puzzles need more or a faster failure is wanted for empty boards.
@@ -74,19 +77,17 @@ def get_puzzle(difficulty: Literal["easy", "medium", "hard"]):
     Returns:
         dict: `{"board": [[int]]}`, a 9x9 grid with 0 for empty cells.
     """
-    with _lock:
-        result = list(_prolog.query(f"puzzle({difficulty}, B), puzzle_to_list(B, L)"))
-    board = [list(row) for row in result[0]["L"]]
-    return {"board": board}
+    result = janus.query_once("puzzle(D, L)", {"D": difficulty})
+    return {"board": result["L"]}
 
 
 @app.post("/api/solve")
 def solve(request: SolveRequest):
     """Solve a Sudoku board via solver.pl's solve_api/2.
 
-    Runs the query under a 10s time limit and the shared engine lock,
-    since an unconstrained board (e.g. all zeros) can otherwise search
-    for far longer than any request should wait.
+    Runs the query under a 10s time limit, since an unconstrained board
+    (e.g. all zeros) can otherwise search for far longer than any
+    request should wait.
 
     Args:
         request: The board to solve, already validated as 9x9, 0-9.
@@ -100,23 +101,21 @@ def solve(request: SolveRequest):
             unexpectedly (logged server-side before the response is sent).
     """
     goal = (
-        f"catch(call_with_time_limit({_SOLVE_TIMEOUT_SECONDS}, "
-        f"solve_api({request.board}, Solution)), "
-        f"time_limit_exceeded, Solution = timeout)"
+        "catch(call_with_time_limit(Limit, solve_api(Board, Solution)), "
+        "time_limit_exceeded, Solution = timeout)"
     )
     try:
-        with _lock:
-            result = list(_prolog.query(goal))
+        result = janus.query_once(
+            goal, {"Board": request.board, "Limit": _SOLVE_TIMEOUT_SECONDS}
+        )
     except Exception:
         logger.exception("solve_api query failed")
         raise HTTPException(status_code=500, detail="Solver failed unexpectedly.")
-    if not result:
+    if not result["truth"]:
         return {"error": "No solution exists."}
-    solution_term = result[0]["Solution"]
-    if solution_term == "timeout":
+    if result["Solution"] == "timeout":
         return {"error": "Solver timed out."}
-    solution = [list(row) for row in solution_term]
-    return {"solution": solution}
+    return {"solution": result["Solution"]}
 
 
 app.mount("/", StaticFiles(directory=str(_BASE_DIR / "static"), html=True), name="static")

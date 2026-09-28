@@ -7,7 +7,7 @@ A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed 
 - Web interface: click-to-edit cells, real-time validation, and visual distinction between clues and solved cells. Includes preset Easy/Medium/Hard puzzles.
 - Solves via SWI-Prolog's CLP(FD) library: constraint propagation with backtracking, typically under a second, guaranteed correct when a solution exists.
 - Runs in Docker with all dependencies included.
-- FastAPI calls into SWI-Prolog in-process via PySwip, with no subprocess and no Python fallback.
+- FastAPI calls into SWI-Prolog in-process via Janus, with no subprocess and no Python fallback.
 
 ## Requirements
 
@@ -149,13 +149,13 @@ Key predicates:
 - `sudoku/1`: Main solver predicate
 - `valid_rows/1`, `valid_columns/1`, `valid_regions/1`: Constraint validators
 - `display_board/1`: Pretty-prints the board
-- `solve_api/2`: Entry point the web API calls via PySwip (0 = empty cell in, solved board out)
+- `solve_api/2`: Entry point the web API calls via Janus (0 = empty cell in, solved board out)
 
 ### Web Interface (src/main.py + src/static/)
 
 - Click-to-edit grid with real-time validation
 - Visual distinction between clues and solved cells
-- FastAPI calls solver.pl in-process via PySwip (binds directly to `libswipl.so`, no subprocess)
+- FastAPI calls solver.pl in-process via Janus (binds directly to `libswipl.so`, no subprocess)
 - Plain HTML/CSS/JS frontend served by FastAPI, talking to the API via `fetch`
 
 ## Project Structure
@@ -164,10 +164,10 @@ Key predicates:
 sudoku-solver/
 ├── src/
 │   ├── solver.pl        # Prolog solver core with CLP(FD)
-│   ├── main.py          # FastAPI backend (PySwip integration)
+│   ├── main.py          # FastAPI backend (Janus integration)
 │   └── static/          # HTML/CSS/JS frontend
 ├── tests/
-│   ├── test_solver.py   # Prolog/PySwip smoke tests
+│   ├── test_solver.py   # Prolog/Janus smoke tests
 │   └── test_main.py     # FastAPI endpoint smoke tests
 ├── Dockerfile           # Container definition
 ├── requirements.txt     # Python dependencies
@@ -191,7 +191,7 @@ Worst case is $O(9^n)$ where $n$ is the number of empty cells, though typical pe
          │ HTTP/JSON
 ┌────────▼────────┐
 │  src/main.py    │  FastAPI
-│   (Python)      │  - PySwip (in-process)
+│   (Python)      │  - Janus (in-process)
 └────────┬────────┘  - threading.Lock
          │
 ┌────────▼────────┐

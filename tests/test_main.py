@@ -53,10 +53,9 @@ def test_solve_malformed_board_returns_422():
 
 def test_solve_empty_board_returns_some_full_solution():
     # No API-level guard against an all-empty board (that's a UI-only
-    # concern) -- Prolog returns *some* valid full solution. This only
-    # completes because call_with_time_limit runs solve_api like once/1:
-    # plain prolog.query() has maxresult=-1 and would otherwise backtrack
-    # through all ~6.7x10^21 solutions of an empty grid and never return.
+    # concern) -- Prolog returns *some* valid full solution. query_once
+    # already commits to the first solution (like once/1), so this
+    # doesn't need to search all ~6.7x10^21 solutions of an empty grid.
     board = [[0] * 9 for _ in range(9)]
     response = client.post("/api/solve", json={"board": board})
     assert response.status_code == 200
@@ -98,16 +97,16 @@ def test_solve_unexpected_error_returns_500_and_logs():
     handler = ListHandler()
     logger = logging.getLogger("src.main")
     logger.addHandler(handler)
-    original_query = main._prolog.query
+    original_query_once = main.janus.query_once
 
     def boom(*args, **kwargs):
         raise RuntimeError("boom")
 
-    main._prolog.query = boom
+    main.janus.query_once = boom
     try:
         response = client.post("/api/solve", json={"board": [[0] * 9 for _ in range(9)]})
     finally:
-        main._prolog.query = original_query
+        main.janus.query_once = original_query_once
         logger.removeHandler(handler)
 
     assert response.status_code == 500

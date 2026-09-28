@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends swi-prolog \
+ && apt-get install -y --no-install-recommends swi-prolog build-essential pkg-config \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
