@@ -180,10 +180,10 @@ sudoku-solver/
 ├── tests/
 │   ├── test_solver.py   # Prolog/PySwip smoke tests
 │   └── test_main.py     # FastAPI endpoint smoke tests
-├── Dockerfile          # Container definition
-├── requirements.txt    # Python dependencies
-├── LICENSE             # MIT License
-└── README.md           # This file
+├── Dockerfile           # Container definition
+├── requirements.txt     # Python dependencies
+├── LICENSE              # MIT License
+└── README.md            # This file
 ```
 
 ## Technical Details
@@ -201,8 +201,8 @@ sudoku-solver/
 
 ```
 ┌─────────────────┐
-│  static/*        │  HTML/CSS/JS Frontend
-│  (browser)       │  - fetch() to /api/*
+│  static/*       │  HTML/CSS/JS Frontend
+│  (browser)      │  - fetch() to /api/*
 └────────┬────────┘
          │ HTTP/JSON
 ┌────────▼────────┐
