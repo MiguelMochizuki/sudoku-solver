@@ -122,12 +122,6 @@ puzzle_to_list([Row|Rows], [ConvertedRow|ConvertedRows]) :-
 var_to_zero(X, 0) :- var(X), !.
 var_to_zero(X, X).
 
-% Output puzzle in Python-friendly format (0 for empty cells)
-print_puzzle_as_list(Name) :-
-    puzzle(Name, Board),
-    puzzle_to_list(Board, ListBoard),
-    maplist(writeln, ListBoard).
-
 puzzle(easy,
     [[_,_,3, _,2,_, 6,_,_],
      [9,_,_, 3,_,5, _,_,1],
@@ -180,10 +174,6 @@ puzzle_name(3, hard).
 % =============================================================================
 % MANUAL BOARD INPUT
 % =============================================================================
-
-read_row(Row) :-
-    write('  Enter 9 numbers separated by spaces (0 = empty): '),
-    read_term(Row, []).
 
 replace_zeros([], []).
 replace_zeros([0|T], [_|T2]) :- replace_zeros(T, T2).
