@@ -1,23 +1,13 @@
 # Sudoku Solver
 
-A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally developed for the Logic Applied to Computing course at UFPB (Federal University of Paraíba, Brazil), this project demonstrates practical applications of declarative programming and automated reasoning.
+A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed for the Logic Applied to Computing course at UFPB (Federal University of Paraíba, Brazil).
 
 ## Features
 
-- **Modern Web Interface**: Clean, interactive web UI
-  - Click-to-edit cells
-  - Real-time validation
-  - Visual distinction between clues and solutions
-  - Pre-loaded example puzzles (Easy, Medium, Hard)
-
-- **Efficient Solving**: Uses SWI-Prolog's CLP(FD) library for constraint-based solving
-  - Constraint propagation with backtracking
-  - Typically solves puzzles in under 1 second
-  - Guaranteed to find solution if one exists
-
-- **Docker-Ready**: Containerized deployment with all dependencies included
-
-- **Direct Prolog Integration**: FastAPI calls into SWI-Prolog in-process via PySwip — no subprocess, no Python fallback
+- Web interface: click-to-edit cells, real-time validation, and visual distinction between clues and solved cells. Includes preset Easy/Medium/Hard puzzles.
+- Solves via SWI-Prolog's CLP(FD) library: constraint propagation with backtracking, typically under a second, guaranteed correct when a solution exists.
+- Runs in Docker with all dependencies included.
+- FastAPI calls into SWI-Prolog in-process via PySwip, with no subprocess and no Python fallback.
 
 ## Requirements
 
@@ -89,12 +79,12 @@ A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally develope
 
 ## Using the Web Interface
 
-1. **Enter a Puzzle**: Click any cell and type a number (1-9), or leave empty
-2. **Try Examples**: Click Easy, Medium, or Hard for pre-loaded puzzles
-3. **Solve**: Click the ▶ Solve button
-4. **View Solution**: Original clues appear in dark blue, solved cells in green
-5. **Try Again**: Click 🔄 Try Again to modify the puzzle
-6. **Clear**: Click 🗑️ Clear to start fresh
+1. Click any cell and type a number (1-9), or leave it empty
+2. Click Easy, Medium, or Hard to load a pre-built puzzle
+3. Click Solve
+4. Original clues appear in light blue, solved cells in green
+5. Click Try Again to edit the puzzle again
+6. Click Clear to start fresh
 
 ### Direct Prolog Interface (CLI)
 
@@ -149,11 +139,11 @@ Access these directly in the web interface by clicking the respective buttons.
 
 The solver uses Constraint Logic Programming over Finite Domains (CLP(FD)):
 
-1. **Domain Definition**: Each cell must contain a digit from 1 to 9
-2. **Row Constraints**: All cells in a row must be distinct
-3. **Column Constraints**: All cells in a column must be distinct
-4. **Region Constraints**: All cells in each 3×3 block must be distinct
-5. **Labeling**: Find values that satisfy all constraints using backtracking
+1. Each cell must contain a digit from 1 to 9
+2. All cells in a row must be distinct
+3. All cells in a column must be distinct
+4. All cells in each 3×3 block must be distinct
+5. Backtracking search finds values that satisfy all constraints
 
 Key predicates:
 - `sudoku/1`: Main solver predicate
@@ -163,11 +153,10 @@ Key predicates:
 
 ### Web Interface (src/main.py + src/static/)
 
-The web interface provides:
-- **Interactive Grid**: Click-to-edit cells with real-time validation
-- **Visual Feedback**: Distinguishes between clues and solutions
-- **Prolog Integration**: FastAPI calls solver.pl in-process via PySwip (binds directly to `libswipl.so`, no subprocess)
-- **Static Frontend**: Plain HTML/CSS/JS served by FastAPI, talking to the API via `fetch`
+- Click-to-edit grid with real-time validation
+- Visual distinction between clues and solved cells
+- FastAPI calls solver.pl in-process via PySwip (binds directly to `libswipl.so`, no subprocess)
+- Plain HTML/CSS/JS frontend served by FastAPI, talking to the API via `fetch`
 
 ## Project Structure
 
@@ -188,14 +177,9 @@ sudoku-solver/
 
 ## Technical Details
 
-**Algorithm**: Constraint propagation with backtracking search
-- Uses SWI-Prolog's `clpfd` library
-- First-fail strategy for efficient variable assignment
-- Guarantees finding a solution if one exists
+The solver uses constraint propagation with backtracking search: SWI-Prolog's `clpfd` library, with a first-fail strategy for variable assignment, guarantees a solution when one exists.
 
-**Complexity**:
-- Worst case: $O(9^n)$ where $n$ is the number of empty cells
-- Typical performance: < 1 second for most puzzles due to constraint propagation
+Worst case is $O(9^n)$ where $n$ is the number of empty cells, though typical performance stays under a second thanks to constraint propagation.
 
 ## Architecture
 
