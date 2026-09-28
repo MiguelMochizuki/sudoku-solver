@@ -82,7 +82,7 @@ A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally develope
 
 3. Run the app:
    ```bash
-   uvicorn main:app --reload --port 8501
+   uvicorn src.main:app --reload --port 8501
    ```
 
 4. Open your browser to `http://localhost:8501`
@@ -100,7 +100,7 @@ A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally develope
 
 Run the interactive Prolog menu:
 ```bash
-swipl -q -g main -t halt solver.pl
+swipl -q -g main -t halt src/solver.pl
 ```
 
 The menu offers:
@@ -113,12 +113,12 @@ The menu offers:
 
 Solve a puzzle programmatically:
 ```bash
-swipl -q -g "solve_and_print([[_,_,3,_,2,_,6,_,_],[9,_,_,3,_,5,_,_,1],...])" -t halt solver.pl
+swipl -q -g "solve_and_print([[_,_,3,_,2,_,6,_,_],[9,_,_,3,_,5,_,_,1],...])" -t halt src/solver.pl
 ```
 
 Or use example puzzles:
 ```bash
-swipl -q -g "puzzle(easy, B), sudoku(B), display_board(B)" -t halt solver.pl
+swipl -q -g "puzzle(easy, B), sudoku(B), display_board(B)" -t halt src/solver.pl
 ```
 
 ## Example Puzzles
@@ -160,7 +160,7 @@ Key predicates:
 - `valid_rows/1`, `valid_columns/1`, `valid_regions/1`: Constraint validators
 - `display_board/1`: Pretty-prints the board
 
-### Web Interface (main.py + static/)
+### Web Interface (src/main.py + src/static/)
 
 The web interface provides:
 - **Interactive Grid**: Click-to-edit cells with real-time validation
@@ -172,11 +172,13 @@ The web interface provides:
 
 ```
 sudoku-solver/
-├── solver.pl           # Prolog solver core with CLP(FD)
-├── main.py             # FastAPI backend (PySwip integration)
-├── static/             # HTML/CSS/JS frontend
-├── test_solver.py      # Prolog/PySwip smoke tests
-├── test_main.py        # FastAPI endpoint smoke tests
+├── src/
+│   ├── solver.pl        # Prolog solver core with CLP(FD)
+│   ├── main.py          # FastAPI backend (PySwip integration)
+│   └── static/          # HTML/CSS/JS frontend
+├── tests/
+│   ├── test_solver.py   # Prolog/PySwip smoke tests
+│   └── test_main.py     # FastAPI endpoint smoke tests
 ├── Dockerfile          # Container definition
 ├── requirements.txt    # Python dependencies
 ├── LICENSE             # MIT License
@@ -203,7 +205,7 @@ sudoku-solver/
 └────────┬────────┘
          │ HTTP/JSON
 ┌────────▼────────┐
-│   main.py       │  FastAPI
+│  src/main.py    │  FastAPI
 │   (Python)      │  - PySwip (in-process)
 └────────┬────────┘  - threading.Lock
          │

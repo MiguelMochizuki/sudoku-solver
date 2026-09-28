@@ -1,12 +1,16 @@
 """Plain-assert smoke tests for the FastAPI app, using TestClient.
 
-Run from the repo root: python test_main.py  (or: pytest test_main.py)
+Run from anywhere: python tests/test_main.py  (or: pytest tests/test_main.py)
 """
+import sys
 import threading
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fastapi.testclient import TestClient
 
-from main import app
+from src.main import app
 
 client = TestClient(app)
 
@@ -63,7 +67,7 @@ def test_solve_empty_board_returns_some_full_solution():
 def test_solve_times_out_instead_of_hanging():
     # Force a real timeout through the actual endpoint (not a synthetic
     # goal) so the test pins main.py's real goal string, not a copy of it.
-    import main
+    from src import main
 
     original_timeout = main._SOLVE_TIMEOUT_SECONDS
     main._SOLVE_TIMEOUT_SECONDS = 0.001
@@ -81,7 +85,7 @@ def test_solve_unexpected_error_returns_500_and_logs():
     # since FastAPI does not log a raised HTTPException on its own.
     import logging
 
-    import main
+    from src import main
 
     class ListHandler(logging.Handler):
         def __init__(self):
@@ -92,7 +96,7 @@ def test_solve_unexpected_error_returns_500_and_logs():
             self.records.append(record)
 
     handler = ListHandler()
-    logger = logging.getLogger("main")
+    logger = logging.getLogger("src.main")
     logger.addHandler(handler)
     original_query = main._prolog.query
 

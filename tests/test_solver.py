@@ -1,10 +1,12 @@
 """Plain-assert smoke tests for solver.pl's solve_api/2, run via PySwip.
 
-Run from the repo root: python test_solver.py  (or: pytest test_solver.py)
+Run from anywhere: python tests/test_solver.py  (or: pytest tests/test_solver.py)
 """
+from pathlib import Path
+
 from pyswip import Prolog
 
-SOLVER_PATH = "solver.pl"
+SOLVER_PATH = str(Path(__file__).resolve().parent.parent / "src" / "solver.pl")
 
 
 def _prolog():

@@ -1,5 +1,6 @@
 import logging
 import threading
+from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
@@ -9,10 +10,12 @@ from pyswip import Prolog
 
 logger = logging.getLogger(__name__)
 
+_BASE_DIR = Path(__file__).resolve().parent
+
 app = FastAPI()
 
 _prolog = Prolog()
-_prolog.consult("solver.pl")
+_prolog.consult(str(_BASE_DIR / "solver.pl"))
 _lock = threading.Lock()
 
 # ponytail: fixed 10s ceiling (matches the old subprocess timeout); lower/raise
@@ -65,4 +68,4 @@ def solve(request: SolveRequest):
     return {"solution": solution}
 
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/", StaticFiles(directory=str(_BASE_DIR / "static"), html=True), name="static")
