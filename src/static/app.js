@@ -1,6 +1,8 @@
 const boardEl = document.getElementById("board");
 const messageEl = document.getElementById("message");
+const messageWrapEl = document.getElementById("message-wrap");
 const tryAgainBtn = document.getElementById("try-again-btn");
+const tryAgainWrapEl = document.getElementById("try-again-wrap");
 
 let clueMask = Array.from({ length: 9 }, () => Array(9).fill(false));
 let lastSubmittedBoard = null;
@@ -63,17 +65,18 @@ function writeBoard(board, { clues } = {}) {
 
 function showMessage(text, kind) {
   messageEl.textContent = text;
-  messageEl.className = `message show ${kind}`;
+  messageEl.className = `message ${kind}`;
+  messageWrapEl.classList.add("show");
 }
 
 function clearMessage() {
-  messageEl.className = "message";
+  messageWrapEl.classList.remove("show");
 }
 
 function clearBoard() {
   clueMask = Array.from({ length: 9 }, () => Array(9).fill(false));
   lastSubmittedBoard = null;
-  tryAgainBtn.classList.add("hidden");
+  tryAgainWrapEl.classList.remove("show");
   writeBoard(Array.from({ length: 9 }, () => Array(9).fill(0)));
   clearMessage();
 }
@@ -88,7 +91,7 @@ async function loadPuzzle(difficulty) {
   const { board } = await response.json();
   clueMask = board.map((row) => row.map((v) => v !== 0));
   lastSubmittedBoard = null;
-  tryAgainBtn.classList.add("hidden");
+  tryAgainWrapEl.classList.remove("show");
   writeBoard(board);
 }
 
@@ -96,7 +99,7 @@ function tryAgain() {
   if (!lastSubmittedBoard) return;
   clueMask = lastSubmittedBoard.map((row) => row.map((v) => v !== 0));
   writeBoard(lastSubmittedBoard);
-  tryAgainBtn.classList.add("hidden");
+  tryAgainWrapEl.classList.remove("show");
   clearMessage();
 }
 
@@ -123,8 +126,12 @@ async function solve() {
   }
   clueMask = board.map((row) => row.map((v) => v !== 0));
   lastSubmittedBoard = board;
+  boardEl.classList.add("revealing");
   writeBoard(data.solution, { clues: true });
-  tryAgainBtn.classList.remove("hidden");
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => boardEl.classList.remove("revealing"));
+  });
+  tryAgainWrapEl.classList.add("show");
   showMessage("Solved!", "success");
 }
 
