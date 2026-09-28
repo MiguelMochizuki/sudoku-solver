@@ -192,7 +192,7 @@ Worst case is $O(9^n)$ where $n$ is the number of empty cells, though typical pe
 ┌────────▼────────┐
 │  src/main.py    │  FastAPI
 │   (Python)      │  - Janus (in-process)
-└────────┬────────┘  - threading.Lock
+└────────┬────────┘  - engine per thread
          │
 ┌────────▼────────┐
 │   solver.pl     │  Prolog Solver

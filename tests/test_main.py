@@ -53,7 +53,7 @@ def test_solve_malformed_board_returns_422():
 
 def test_solve_empty_board_returns_some_full_solution():
     # No API-level guard against an all-empty board (that's a UI-only
-    # concern) -- Prolog returns *some* valid full solution. query_once
+    # concern), so Prolog returns *some* valid full solution. query_once
     # already commits to the first solution (like once/1), so this
     # doesn't need to search all ~6.7x10^21 solutions of an empty grid.
     board = [[0] * 9 for _ in range(9)]
