@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sudoku Solver</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main class="app">
+    <h1>Sudoku Solver</h1>
+    <p class="subtitle">Powered by SWI-Prolog CLP(FD)</p>
+
+    <div class="controls">
+      <button id="clear-btn">Clear</button>
+      <button data-difficulty="easy">Easy</button>
+      <button data-difficulty="medium">Medium</button>
+      <button data-difficulty="hard">Hard</button>
+      <button id="solve-btn" class="primary">Solve</button>
+    </div>
+
+    <div id="board" class="board"></div>
+
+    <button id="try-again-btn" class="hidden">🔄 Try Again</button>
+
+    <div id="message" class="message"></div>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

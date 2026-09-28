@@ -21,6 +21,7 @@
 
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
+:- use_module(library(time)).
 
 % =============================================================================
 % MAIN PREDICATE
@@ -307,6 +308,18 @@ solve_and_print(Board) :-
     ;   write('ERROR: No solution found'), nl,
         halt(1)
     ).
+
+% =============================================================================
+% API INTERFACE (for PySwip)
+% =============================================================================
+
+% solve_api(+BoardIn, -Solution)
+% BoardIn: 9x9 list of ints, 0 = empty. Solution: 9x9 list of solved ints.
+% Yields no results (query has zero solutions) if BoardIn is unsatisfiable.
+solve_api(BoardIn, Solution) :-
+    maplist(replace_zeros, BoardIn, Board),
+    sudoku(Board),
+    Solution = Board.
 
 % =============================================================================
 % AUTO ENTRY POINT (for interactive CLI usage)

@@ -43,7 +43,7 @@ A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally develope
   sudo dnf install pl
   ```
 
-- **Python 3.12+**: With Streamlit
+- **Python 3.12+**: With FastAPI
   ```bash
   pip install -r requirements.txt
   ```
@@ -80,9 +80,9 @@ A modern 9×9 Sudoku solver using Prolog's constraint logic. Originally develope
    swipl --version
    ```
 
-3. Run the Streamlit app:
+3. Run the app:
    ```bash
-   streamlit run app.py
+   uvicorn main:app --reload --port 8501
    ```
 
 4. Open your browser to `http://localhost:8501`
@@ -160,20 +160,23 @@ Key predicates:
 - `valid_rows/1`, `valid_columns/1`, `valid_regions/1`: Constraint validators
 - `display_board/1`: Pretty-prints the board
 
-### Streamlit Web Interface (app.py)
+### Web Interface (main.py + static/)
 
 The web interface provides:
 - **Interactive Grid**: Click-to-edit cells with real-time validation
 - **Visual Feedback**: Distinguishes between clues and solutions
-- **Prolog Integration**: Calls solver.pl directly via subprocess
-- **Session Management**: Maintains puzzle state across interactions
+- **Prolog Integration**: FastAPI calls solver.pl in-process via PySwip (binds directly to `libswipl.so`, no subprocess)
+- **Static Frontend**: Plain HTML/CSS/JS served by FastAPI, talking to the API via `fetch`
 
 ## Project Structure
 
 ```
 sudoku-solver/
 ├── solver.pl           # Prolog solver core with CLP(FD)
-├── app.py              # Streamlit web interface
+├── main.py             # FastAPI backend (PySwip integration)
+├── static/             # HTML/CSS/JS frontend
+├── test_solver.py      # Prolog/PySwip smoke tests
+├── test_main.py        # FastAPI endpoint smoke tests
 ├── Dockerfile          # Container definition
 ├── requirements.txt    # Python dependencies
 ├── LICENSE             # MIT License
@@ -195,11 +198,14 @@ sudoku-solver/
 
 ```
 ┌─────────────────┐
-│   app.py        │  Streamlit Web UI
-│   (Python)      │  - Interactive grid
-└────────┬────────┘  - Session management
-         │
-         │ subprocess.run()
+│  static/*        │  HTML/CSS/JS Frontend
+│  (browser)       │  - fetch() to /api/*
+└────────┬────────┘
+         │ HTTP/JSON
+┌────────▼────────┐
+│   main.py       │  FastAPI
+│   (Python)      │  - PySwip (in-process)
+└────────┬────────┘  - threading.Lock
          │
 ┌────────▼────────┐
 │   solver.pl     │  Prolog Solver
