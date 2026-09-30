@@ -46,20 +46,23 @@ CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8501", "--reload
 # (library(time) for call_with_time_limit) and ext/swipy are kept.
 FROM base AS swipl-slim
 RUN cd /usr/lib/swi-prolog/library/ext && ls | grep -vxE 'clib|swipy' | xargs rm -rf \
- && cd /usr/lib/swi-prolog/lib/x86_64-linux \
+ && cd /usr/lib/swi-prolog/lib/*-linux \
  && rm -f archive4pl.so double_metaphone.so http_stream.so inclpr.so isub.so json.so \
       libedit4pl.so ntriples.so pcre4pl.so pdt_console.so porter_stem.so protobufs.so \
       rdf_db.so readline4pl.so redis4pl.so sgml2pl.so snowball.so ssl4pl.so crypto4pl.so \
       sweep-module.so table.so test_cpp.so test_ffi.so
+# libswipl and libgmp live in an arch-specific dir (x86_64-linux-gnu, aarch64-linux-gnu);
+# stage them in a neutral one so the runtime stage is the same on every platform.
+RUN mkdir /swipl-libs && cp -P /usr/lib/*-linux-gnu/libswipl.so.9* /usr/lib/*-linux-gnu/libgmp.so.10* /swipl-libs/
 
 # Production (default target, must stay last): distroless Python, no shell or apt.
-# SWI-Prolog is not packaged for distroless, so its runtime is copied from `base`;
-# libswipl only needs libgmp beyond what distroless already ships.
+# SWI-Prolog is not packaged for distroless, so its runtime is copied from the
+# swipl-slim stage; libswipl only needs libgmp beyond what distroless already ships.
 FROM gcr.io/distroless/python3-debian13 AS runtime
 COPY --from=swipl-slim /usr/lib/swi-prolog /usr/lib/swi-prolog
-COPY --from=base /usr/lib/x86_64-linux-gnu/libswipl.so.9* /usr/lib/x86_64-linux-gnu/libgmp.so.10* /usr/lib/x86_64-linux-gnu/
+COPY --from=swipl-slim /swipl-libs /opt/swipl-libs
 COPY --from=prod-venv /opt/venv/lib/python3.13/site-packages /opt/site-packages
-ENV PYTHONPATH=/opt/site-packages
+ENV PYTHONPATH=/opt/site-packages LD_LIBRARY_PATH=/opt/swipl-libs
 WORKDIR /app
 COPY src ./src
 USER nonroot
