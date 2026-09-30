@@ -178,6 +178,7 @@ Key predicates:
 
 ```
 sudoku-solver/
+├── .github/workflows/   # CI: test, multi-arch image build, Docker Hub publish, GitHub Release
 ├── src/
 │   ├── solver.pl        # Prolog solver core with CLP(FD)
 │   ├── main.py          # FastAPI backend (Janus integration)
@@ -187,6 +188,7 @@ sudoku-solver/
 │   └── test_main.py     # FastAPI endpoint smoke tests
 ├── Dockerfile           # Container definition (dev and runtime targets)
 ├── docker-compose.yml   # Development app and test services
+├── DOCKER_HUB.md        # Docker Hub description (synced on release)
 ├── requirements.txt     # Runtime Python dependencies
 ├── requirements-dev.txt # Development and test dependencies
 ├── LICENSE              # MIT License
