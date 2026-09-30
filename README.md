@@ -33,9 +33,9 @@ A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed 
   sudo dnf install pl
   ```
 
-- **Python 3.12+ (the Docker image uses 3.13)**: With FastAPI
+- **Python 3.12+**: With FastAPI (the Docker image uses 3.13)
   ```bash
-  pip install -r requirements.txt
+  pip install -r requirements-dev.txt
   ```
 
 ## Installation & Usage
@@ -77,6 +77,22 @@ A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed 
 
 4. Open your browser to `http://localhost:8501`
 
+### Option 3: Docker Compose (Development)
+
+1. From the cloned repository, start the app with live reload (`src/` is bind-mounted):
+   ```bash
+   docker compose up
+   ```
+
+2. Open your browser to `http://localhost:8501`
+
+3. Run the tests in the same image:
+   ```bash
+   docker compose run --rm test
+   ```
+
+The plain `docker build .` image is the lean production one, without development dependencies.
+
 ## Using the Web Interface
 
 1. Click any cell and type a number (1-9), or leave it empty
@@ -85,15 +101,6 @@ A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed 
 4. Original clues appear in light blue, solved cells in green
 5. Click Try Again to edit the puzzle again
 6. Click Clear to start fresh
-
-### Option 3: Docker Compose (development)
-
-Live reload with `src/` bind-mounted, and tests in the same image:
-```bash
-docker compose up            # http://localhost:8501, reloads on edit
-docker compose run --rm test
-```
-The plain `docker build .` image is the lean production one (no dev dependencies).
 
 ### Direct Prolog Interface (CLI)
 
@@ -178,8 +185,10 @@ sudoku-solver/
 ├── tests/
 │   ├── test_solver.py   # Prolog/Janus smoke tests
 │   └── test_main.py     # FastAPI endpoint smoke tests
-├── Dockerfile           # Container definition
-├── requirements.txt     # Python dependencies
+├── Dockerfile           # Container definition (dev and runtime targets)
+├── docker-compose.yml   # Development app and test services
+├── requirements.txt     # Runtime Python dependencies
+├── requirements-dev.txt # Development and test dependencies
 ├── LICENSE              # MIT License
 └── README.md            # This file
 ```
