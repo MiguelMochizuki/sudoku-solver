@@ -1,0 +1,21 @@
+# Development only. Production image: `docker build -t sudoku-solver .`
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+
+  test:
+    profiles: ["test"]
+    build:
+      context: .
+      target: dev
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+    command: ["pytest", "-q", "-p", "no:cacheprovider"]

@@ -33,7 +33,7 @@ A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed 
   sudo dnf install pl
   ```
 
-- **Python 3.12+**: With FastAPI
+- **Python 3.12+ (the Docker image uses 3.13)**: With FastAPI
   ```bash
   pip install -r requirements.txt
   ```
@@ -62,7 +62,7 @@ A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed 
    ```bash
    git clone https://github.com/AlbertNewton/sudoku-solver.git
    cd sudoku-solver
-   pip install -r requirements.txt
+   pip install -r requirements-dev.txt
    ```
 
 2. Verify SWI-Prolog is installed:
@@ -85,6 +85,15 @@ A 9×9 Sudoku solver built with Prolog's constraint logic. Originally developed 
 4. Original clues appear in light blue, solved cells in green
 5. Click Try Again to edit the puzzle again
 6. Click Clear to start fresh
+
+### Option 3: Docker Compose (development)
+
+Live reload with `src/` bind-mounted, and tests in the same image:
+```bash
+docker compose up            # http://localhost:8501, reloads on edit
+docker compose run --rm test
+```
+The plain `docker build .` image is the lean production one (no dev dependencies).
 
 ### Direct Prolog Interface (CLI)
 
